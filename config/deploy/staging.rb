@@ -1,3 +1,15 @@
+set :rails_env, 'staging'
+set :branch,    'develop'
+
+# デプロイ先へのアクセス設定
+set :ssh_options, {
+  auth_methods: [ 'publickey' ],
+  keys:         [ '~/.ssh/aws-keypair-20200121.pem' ],
+}
+
+server '13.114.22.25',  user: 'ec2-user', roles: %w{app db web}
+server '54.199.202.29', user: 'ec2-user', roles: %w{app db web}
+
 # server-based syntax
 # ======================
 # Defines a single server with a list of roles and multiple properties.

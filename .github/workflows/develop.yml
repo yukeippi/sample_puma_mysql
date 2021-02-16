@@ -1,0 +1,63 @@
+name: Run Rspec and Deploy
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+    services:
+      db:
+        image: mysql:5.7.33
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: sample_puma_mysql_test
+
+    container:
+      image: ruby:2.7.2
+      env:
+        RAILS_ENV: test
+    steps:
+    - uses: actions/checkout@v2
+    - name: Update library
+      run: |
+        apt-get update
+    - name: Install node.js
+      run: |
+        curl -sL https://deb.nodesource.com/setup_12.x | bash -
+        apt-get install -y nodejs
+    - name: Install yarn
+      run: |
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+        apt-get update
+        apt-get install -y yarn
+    - name: Prepare bundler
+      run: |
+        gem install bundler
+        bundle install --jobs 4 --retry 3
+    - name: Prepare database
+      run: |
+        cp config/database.github-actions.yml config/database.yml
+        bundle exec rails db:test:prepare
+    - name: Run test
+      run: TZ=Asiz/Tokyo bundle exec rspec -f d
+
+  deploy:
+    needs: rspec
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: 2.7.2
+        bundler-cache: true
+    - uses: miloserdow/capistrano-deploy@master
+      with:
+        target: staging
+        deploy_key: ${{ secrets.DEPLOY_ENC_KEY }}
