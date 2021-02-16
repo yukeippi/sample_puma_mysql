@@ -51,5 +51,7 @@ test:
 production:
   <<: *default
   database: sample_puma_mysql_production
-  username: sample_puma_mysql
-  password: <%= ENV['SAMPLE_PUMA_MYSQL_DATABASE_PASSWORD'] %>
+  username: <%= Rails.application.credentials.db[:username] %>
+  password: <%= Rails.application.credentials.db[:password] %>
+  host:     <%= Rails.application.credentials.db[:host] %>
+  port:     3306
