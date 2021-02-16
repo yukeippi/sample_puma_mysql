@@ -8,7 +8,7 @@ set :ssh_options, {
 }
 
 server '13.114.22.25',  user: 'ec2-user', roles: %w{app db web}
-server '54.199.202.29', user: 'ec2-user', roles: %w{app db web}
+# server '54.248.28.109', user: 'ec2-user', roles: %w{app db web}
 
 # server-based syntax
 # ======================
